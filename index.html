@@ -392,6 +392,11 @@
 
   async function downloadPDF() {
     if (!currentHolidays.length) return;
+    if (typeof window.jspdf === 'undefined') {
+      resultsDiv.innerHTML += '<p class="status error">PDF-biblioteket laddades inte. Ladda om sidan och försök igen.</p>';
+      return;
+    }
+
     const year = yearInput.value;
 
     const { jsPDF } = window.jspdf;
@@ -460,7 +465,7 @@
 
   loadCountries().then(() => loadHolidays());
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 </body>
 </html>
