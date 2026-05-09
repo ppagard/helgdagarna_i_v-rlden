@@ -9,113 +9,195 @@ from fpdf import FPDF
 
 API = "https://date.nager.at/api/v3"
 
-# ── Beskrivningar ──
+# ── Beskrivningar (per land) ──
 DESCRIPTIONS = {
-    "Nyårsdagen": (
-        "Nyårsdagen inleder det nya året och är en av de äldsta helgdagarna "
-        "i den kristna kalendern. Traditionellt firas dagen med nyårslöften, "
-        "fyrverkerier från natten innan och årets första nyårskonsert "
-        "i Wien. I Sverige är dagen en allmän helgdag sedan 1785."
-    ),
-    "Trettondedag jul": (
-        "Trettondedagen, eller Epifania, firar de tre vise männens ankomst "
-        "till Betlehem för att hylla Jesusbarnet. Dagen kallas också "
-        "'Trettondagen' och markerar slutet på julsäsongen. "
-        "I Sverige är dagen allmän helgdag sedan 1785."
-    ),
-    "Långfredagen": (
-        "Långfredagen högtidlighåller Jesu korsfästelse och död på Golgata. "
-        "Det är en stilla helgdag inom kristendomen och infaller på "
-        "fredagen före påskdagen. Långfredagen är en rörlig helgdag "
-        "som bestäms utifrån påskens datum."
-    ),
-    "Påskdagen": (
-        "Påskdagen är den viktigaste helgdagen inom kristendomen och "
-        "firar Jesu uppståndelse från de döda. Dagen infaller första "
-        "söndagen efter första fullmånen efter vårdagjämningen "
-        "(mars/april). Påsken är därmed en rörlig högtid."
-    ),
-    "Annandag påsk": (
-        "Annandag påsk är dagen efter påskdagen och fortsätter firandet "
-        "av Jesu uppståndelse. I Sverige har dagen gamla traditioner och "
-        "har varit allmän helgdag sedan 1785. Många passar på att vara "
-        "utomhus och njuta av vårvädret."
-    ),
-    "Första maj": (
-        "Första maj är arbetarrörelsens internationella högtidsdag och "
-        "firas med demonstrationer och tal över hela världen. I Sverige "
-        "blev dagen allmän helgdag 1939. Dagen har sitt ursprung i "
-        "1889 års internationella arbetarkongress i Paris."
-    ),
-    "Kristi himmelsfärdsdag": (
-        "Kristi himmelsfärdsdag firar Jesu himmelsfärd 40 dagar efter "
-        "påsk. Högtiden är en av de tidigaste kristna helgdagarna och "
-        "har firats sedan 300-talet. Dagen infaller alltid på en "
-        "torsdag och är en rörlig helgdag."
-    ),
-    "Pingstdagen": (
-        "Pingstdagen firar den Helige Andes utgjutelse över apostlarna "
-        "50 dagar efter påsk, vilket kallas 'kyrkans födelsedag'. "
-        "Dagen markerar början på den kristna missionen och är en "
-        "rörlig helgdag. Ordet 'pingst' kommer från grekiskans "
-        "'pentekoste' som betyder femtionde."
-    ),
-    "Sveriges nationaldag": (
-        "Sveriges nationaldag firas den 6 juni till minne av två "
-        "historiska händelser: Gustav Vasas kröning 1523 och "
-        "1809 års regeringsform. Dagen blev allmän helgdag först "
-        "2005 och firas med flaggning, kungliga ceremonier och "
-        "medborgarskapsceremonier runt om i landet."
-    ),
-    "Midsommarafton": (
-        "Midsommarafton är en av de mest älskade svenska högtiderna "
-        "och firas på fredagen mellan den 19 och 25 juni. Traditioner "
-        "inkluderar midsommarstång (majstång), folkdans, sillunch "
-        "med nypotatis och jordgubbar. Trots att dagen inte är "
-        "officiellt allmän helgdag är den starkt förankrad i "
-        "svensk kultur."
-    ),
-    "Midsommardagen": (
-        "Midsommardagen infaller på lördagen mellan den 20 och 26 juni."
-        " Den är den kristna högtiden för Johannes Döparens födelse "
-        "och har varit allmän helgdag i Sverige sedan 1953. Dagen "
-        "avslutar midsommarhelgen."
-    ),
-    "Alla helgons dag": (
-        "Alla helgons dag är en kristen helgdag till minne av alla "
-        "helgon och martyrer. I Sverige infaller den på lördagen "
-        "mellan den 31 oktober och 6 november. Traditionellt tänder "
-        "man ljus på gravarna, vilket skapar en stämningsfull syn "
-        "över kyrkogårdarna i novembermörkret."
-    ),
-    "Julafton": (
-        "Julafton är den mest centrala dagen i svenskt julfirande. "
-        "De flesta firar med julmat (skinka, köttbullar, sill, "
-        "lutfisk, risgrynsgröt), julklappar och Kalle Anka på TV "
-        "klockan 15. Julafton är inte officiellt allmän helgdag "
-        "men de flesta arbetsgivare ger ledigt."
-    ),
-    "Juldagen": (
-        "Juldagen firar Jesu Kristi födelse i Betlehem och är en "
-        "av de största kristna högtiderna. Dagen har firats sedan "
-        "300-talet och är i Sverige en stilla helgdag med "
-        "julotta (gudstjänst tidigt på morgonen) och "
-        "familjesammankomster."
-    ),
-    "Annandag jul": (
-        "Annandag jul är dagen efter juldagen och är allmän helgdag "
-        "i Sverige. Traditionellt sett var det en dag för jakt, "
-        "slädturer och idrottsevenemang. Idag används dagen ofta "
-        "för att umgås med familj och vänner eller för att "
-        "utnyttja mellandagsrean."
-    ),
-    "Nyårsafton": (
-        "Nyårsafton firas den 31 december, årets sista dag. "
-        "Kvällen inleds ofta med en festlig middag och avslutas "
-        "med fyrverkerier vid midnatt. Dagen är inte officiellt "
-        "en allmän helgdag men i praktiken har de flesta ledigt "
-        "för att fira det nya årets ankomst."
-    ),
+    "SE": {
+        "Nyårsdagen": (
+            "Nyårsdagen inleder det nya året och är en av de äldsta helgdagarna "
+            "i den kristna kalendern. Traditionellt firas dagen med nyårslöften, "
+            "fyrverkerier från natten innan och årets första nyårskonsert "
+            "i Wien. I Sverige är dagen en allmän helgdag sedan 1785."
+        ),
+        "Trettondedag jul": (
+            "Trettondedagen, eller Epifania, firar de tre vise männens ankomst "
+            "till Betlehem för att hylla Jesusbarnet. Dagen kallas också "
+            "'Trettondagen' och markerar slutet på julsäsongen. "
+            "I Sverige är dagen allmän helgdag sedan 1785."
+        ),
+        "Långfredagen": (
+            "Långfredagen högtidlighåller Jesu korsfästelse och död på Golgata. "
+            "Det är en stilla helgdag inom kristendomen och infaller på "
+            "fredagen före påskdagen. Långfredagen är en rörlig helgdag "
+            "som bestäms utifrån påskens datum."
+        ),
+        "Påskdagen": (
+            "Påskdagen är den viktigaste helgdagen inom kristendomen och "
+            "firar Jesu uppståndelse från de döda. Dagen infaller första "
+            "söndagen efter första fullmånen efter vårdagjämningen "
+            "(mars/april). Påsken är därmed en rörlig högtid."
+        ),
+        "Annandag påsk": (
+            "Annandag påsk är dagen efter påskdagen och fortsätter firandet "
+            "av Jesu uppståndelse. I Sverige har dagen gamla traditioner och "
+            "har varit allmän helgdag sedan 1785. Många passar på att vara "
+            "utomhus och njuta av vårvädret."
+        ),
+        "Första maj": (
+            "Första maj är arbetarrörelsens internationella högtidsdag och "
+            "firas med demonstrationer och tal över hela världen. I Sverige "
+            "blev dagen allmän helgdag 1939. Dagen har sitt ursprung i "
+            "1889 års internationella arbetarkongress i Paris."
+        ),
+        "Kristi himmelsfärdsdag": (
+            "Kristi himmelsfärdsdag firar Jesu himmelsfärd 40 dagar efter "
+            "påsk. Högtiden är en av de tidigaste kristna helgdagarna och "
+            "har firats sedan 300-talet. Dagen infaller alltid på en "
+            "torsdag och är en rörlig helgdag."
+        ),
+        "Pingstdagen": (
+            "Pingstdagen firar den Helige Andes utgjutelse över apostlarna "
+            "50 dagar efter påsk, vilket kallas 'kyrkans födelsedag'. "
+            "Dagen markerar början på den kristna missionen och är en "
+            "rörlig helgdag. Ordet 'pingst' kommer från grekiskans "
+            "'pentekoste' som betyder femtionde."
+        ),
+        "Sveriges nationaldag": (
+            "Sveriges nationaldag firas den 6 juni till minne av två "
+            "historiska händelser: Gustav Vasas kröning 1523 och "
+            "1809 års regeringsform. Dagen blev allmän helgdag först "
+            "2005 och firas med flaggning, kungliga ceremonier och "
+            "medborgarskapsceremonier runt om i landet."
+        ),
+        "Midsommarafton": (
+            "Midsommarafton är en av de mest älskade svenska högtiderna "
+            "och firas på fredagen mellan den 19 och 25 juni. Traditioner "
+            "inkluderar midsommarstång (majstång), folkdans, sillunch "
+            "med nypotatis och jordgubbar. Trots att dagen inte är "
+            "officiellt allmän helgdag är den starkt förankrad i "
+            "svensk kultur."
+        ),
+        "Midsommardagen": (
+            "Midsommardagen infaller på lördagen mellan den 20 och 26 juni."
+            " Den är den kristna högtiden för Johannes Döparens födelse "
+            "och har varit allmän helgdag i Sverige sedan 1953. Dagen "
+            "avslutar midsommarhelgen."
+        ),
+        "Alla helgons dag": (
+            "Alla helgons dag är en kristen helgdag till minne av alla "
+            "helgon och martyrer. I Sverige infaller den på lördagen "
+            "mellan den 31 oktober och 6 november. Traditionellt tänder "
+            "man ljus på gravarna, vilket skapar en stämningsfull syn "
+            "över kyrkogårdarna i novembermörkret."
+        ),
+        "Julafton": (
+            "Julafton är den mest centrala dagen i svenskt julfirande. "
+            "De flesta firar med julmat (skinka, köttbullar, sill, "
+            "lutfisk, risgrynsgröt), julklappar och Kalle Anka på TV "
+            "klockan 15. Julafton är inte officiellt allmän helgdag "
+            "men de flesta arbetsgivare ger ledigt."
+        ),
+        "Juldagen": (
+            "Juldagen firar Jesu Kristi födelse i Betlehem och är en "
+            "av de största kristna högtiderna. Dagen har firats sedan "
+            "300-talet och är i Sverige en stilla helgdag med "
+            "julotta (gudstjänst tidigt på morgonen) och "
+            "familjesammankomster."
+        ),
+        "Annandag jul": (
+            "Annandag jul är dagen efter juldagen och är allmän helgdag "
+            "i Sverige. Traditionellt sett var det en dag för jakt, "
+            "slädturer och idrottsevenemang. Idag används dagen ofta "
+            "för att umgås med familj och vänner eller för att "
+            "utnyttja mellandagsrean."
+        ),
+        "Nyårsafton": (
+            "Nyårsafton firas den 31 december, årets sista dag. "
+            "Kvällen inleds ofta med en festlig middag och avslutas "
+            "med fyrverkerier vid midnatt. Dagen är inte officiellt "
+            "en allmän helgdag men i praktiken har de flesta ledigt "
+            "för att fira det nya årets ankomst."
+        ),
+    },
+    "NO": {
+        "Første nyttårsdag": (
+            "Nyårsdagen inleder det nya året och är en av de äldsta "
+            "helgdagarna i den kristna kalendern. Traditionellt firas "
+            "dagen med nyårslöften, fyrverkerier från natten innan "
+            "och årets första festligheter. I Norge är dagen allmän "
+            "helgdag."
+        ),
+        "Skjærtorsdag": (
+            "Skärtorsdagen infaller på torsdagen före påsk och "
+            "högtidlighåller Jesus sista måltid med lärjungarna "
+            "(den sista nattvarden) innan hans korsfästelse. "
+            "Dagen är en rörlig helgdag och inleder "
+            "påskhelgen i Norge."
+        ),
+        "Langfredag": (
+            "Långfredagen högtidlighåller Jesu korsfästelse och död "
+            "på Golgata. Det är en stilla helgdag inom kristendomen "
+            "och infaller på fredagen före påskdagen. I Norge är "
+            "dagen en allmän helgdag med stilla och eftertänksam karaktär."
+        ),
+        "Første påskedag": (
+            "Påskdagen är den viktigaste helgdagen inom kristendomen "
+            "och firar Jesu uppståndelse från de döda. Dagen infaller "
+            "första söndagen efter första fullmånen efter "
+            "vårdagjämningen. I Norge firas påsken med skidåkning "
+            "och friluftsliv i fjällen."
+        ),
+        "Andre påskedag": (
+            "Andra påskdagen är dagen efter påskdagen och fortsätter "
+            "firandet av Jesu uppståndelse. I Norge är dagen allmän "
+            "helgdag och en del av den långa påskhelgen då många "
+            "är lediga och njuter av vårvädret."
+        ),
+        "Første mai": (
+            "Första maj är arbetarrörelsens internationella högtidsdag "
+            "och firas med demonstrationer och tal över hela världen. "
+            "I Norge har dagen varit allmän helgdag sedan 1947 och "
+            "firas med traditionella 1 maj-tåg runt om i landet."
+        ),
+        "Kristi himmelfartsdag": (
+            "Kristi himmelsfärdsdag firar Jesu himmelsfärd 40 dagar "
+            "efter påsk. Högtiden är en av de tidigaste kristna "
+            "helgdagarna och har firats sedan 300-talet. Dagen "
+            "infaller alltid på en torsdag och är en rörlig helgdag."
+        ),
+        "Syttende mai": (
+            "Syttende mai är Norges nationaldag och firar "
+            "undertecknandet av Norges grundlag i Eidsvoll "
+            "den 17 maj 1814. Dagen firas med barnens tåg, "
+            "flaggning, isglass och fest över hela Norge. "
+            "Det är en av de mest älskade högtiderna i Norge."
+        ),
+        "Første pinsedag": (
+            "Pingstdagen firar den Helige Andes utgjutelse över "
+            "apostlarna 50 dagar efter påsk, vilket kallas "
+            "'kyrkans födelsedag'. Ordet 'pingst' kommer från "
+            "grekiskans 'pentekoste' som betyder femtionde."
+        ),
+        "Andre pinsedag": (
+            "Andra pingstdagen är dagen efter pingstdagen och "
+            "fortsätter firandet av den Helige Andes utgjutelse. "
+            "I Norge är dagen en allmän helgdag och i Norge "
+            "kallas den ofta för 'Andre pinsedag'."
+        ),
+        "Første juledag": (
+            "Juldagen firar Jesu Kristi födelse i Betlehem och "
+            "är en av de största kristna högtiderna. Dagen har "
+            "firats sedan 300-talet. I Norge firas med "
+            "julotta (gudstjänst) och traditionellt julbord "
+            "med pinnekjøtt eller ribbe."
+        ),
+        "Andre juledag": (
+            "Andra juldagen är dagen efter juldagen och är "
+            "allmän helgdag i Norge. Traditionellt sett var "
+            "det en dag för vänbesök och festligheter. "
+            "Dagen kallas i Norge för 'Andre juledag' och "
+            "är en viktig del av julfirandet."
+        ),
+    },
 }
 
 DAYS_SV = ["Måndag", "Tisdag", "Onsdag", "Torsdag", "Fredag", "Lördag", "Söndag"]
@@ -192,7 +274,7 @@ class HolidayPDF(FPDF):
 
 def generate_pdf(country_code, year, output_path, descriptions=None, country_name=None):
     if descriptions is None:
-        descriptions = DESCRIPTIONS
+        descriptions = DESCRIPTIONS.get(country_code.upper(), {})
 
     if country_name is None:
         country_name, raw = fetch_holidays(country_code, year)
