@@ -26,14 +26,20 @@ En snyggt formaterad PDF med alla 16 helgdagar för Sverige 2026:
 
 ### Generera om PDF
 
-PDF:en är skapad med Python och `fpdf2`. För att generera om för ett annat år:
+PDF:en är skapad med Python och `fpdf2`. Skriptet `generate_pdf.py` genererar en PDF för valfritt land och år.
 
 ```bash
 # Installera beroenden
 pip install fpdf2
 
-# Ändra år i skriptet och kör
-python3 generate_pdf.py
+# Sverige 2026
+python3 generate_pdf.py SE 2026
+
+# Annat land och år
+python3 generate_pdf.py NO 2025 -o norge_2025.pdf
+
+# Hjälp
+python3 generate_pdf.py --help
 ```
 
 ## API
