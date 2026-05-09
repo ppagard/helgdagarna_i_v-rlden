@@ -16,17 +16,13 @@ En fristående HTML-sida som hämtar helgdagsdata från [Nager.Date API](https:/
 
 Öppna `index.html` i valfri webbläsare. Välj land och år – helgdagarna laddas direkt.
 
-## PDF (`helgdagar_sverige_2026.pdf`)
+## PDF
 
-En snyggt formaterad PDF med alla 16 helgdagar för Sverige 2026:
+PDF kan genereras på två sätt:
 
-- Omslag med titel
-- Innehållsförteckning
-- En sida per helgdag med datum, veckodag, typ och utförlig beskrivning
+**Via webbsidan:** Klicka på **PDF**-knappen för att ladda ner en PDF för valt land och år (genereras direkt i webbläsaren).
 
-### Generera om PDF
-
-PDF:en är skapad med Python och `fpdf2`. Skriptet `generate_pdf.py` genererar en PDF för valfritt land och år.
+**Via skript:** `generate_pdf.py` genererar en snyggt formaterad PDF med omslag, innehållsförteckning och beskrivningar för alla helgdagar.
 
 ```bash
 # Installera beroenden
