@@ -190,6 +190,34 @@
   .badge-school { background: rgba(34,197,94,0.15); color: #86efac; }
   .badge-observance { background: rgba(148,163,184,0.15); color: #cbd5e1; }
 
+  .pdf-btn {
+    appearance: none;
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    height: 38px;
+  }
+
+  .pdf-btn:hover { background: var(--accent-hover); }
+  .pdf-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .pdf-btn svg {
+    width: 16px;
+    height: 16px;
+    fill: currentColor;
+  }
+
   @media (max-width: 500px) {
     body { padding: 1rem 0.5rem; }
     .controls { flex-direction: column; }
@@ -215,6 +243,10 @@
       <label for="year">År</label>
       <input type="number" id="year" value="2026" min="1900" max="2100" placeholder="År">
     </div>
+    <button class="pdf-btn" id="pdfBtn" disabled onclick="downloadPDF()">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8" fill="none" stroke="#fff" stroke-width="2"/><line x1="12" y1="12" x2="12" y2="18" fill="none" stroke="#fff" stroke-width="2"/><polyline points="9 15 12 18 15 15" fill="none" stroke="#fff" stroke-width="2"/></svg>
+      PDF
+    </button>
   </div>
 
   <div id="results"></div>
@@ -284,9 +316,13 @@
     }
   }
 
+  let currentHolidays = [];
+  let currentCountryName = '';
+
   async function loadHolidays() {
     const code = countrySelect.value;
     const year = parseInt(yearInput.value, 10);
+    document.getElementById('pdfBtn').disabled = true;
 
     if (!code) return;
     if (!year || year < 1900 || year > 2100) {
@@ -309,7 +345,6 @@
 
       const holidays = await res.json();
 
-      // Deduplicera: prioritera Public > Bank > Optional > School > Observance
       const typeRank = { Public: 5, Bank: 4, Optional: 3, School: 2, Observance: 1 };
       const deduped = new Map();
       for (const h of holidays) {
@@ -327,26 +362,93 @@
         return;
       }
 
-      const countryName = countries.find(c => c.countryCode === code)?.name || code;
+      currentHolidays = unique;
+      currentCountryName = countries.find(c => c.countryCode === code)?.name || code;
 
-      let html = `<p class="results-info">${unique.length} helgdagar i <strong>${countryName}</strong> (${year})</p>`;
-      html += `<table><thead><tr><th>Datum</th><th>Dag</th><th>Helgdag</th><th>Typ</th></tr></thead><tbody>`;
-
-      for (const h of unique) {
-        html += `<tr>
-          <td class="date-col">${formatDate(h.date)}</td>
-          <td class="day-col">${dayName(h.date)}</td>
-          <td>${h.localName}${h.name !== h.localName ? ` <span style="color:var(--muted);font-size:0.8rem">(${h.name})</span>` : ''}</td>
-          <td><span class="badge ${toBadgeClass(h.types?.[0])}">${toLabel(h.types?.[0] || 'Public')}</span></td>
-        </tr>`;
-      }
-
-      html += '</tbody></table>';
-      resultsDiv.innerHTML = html;
+      renderTable(currentHolidays, currentCountryName, year);
+      document.getElementById('pdfBtn').disabled = false;
 
     } catch {
       resultsDiv.innerHTML = '<p class="status error">Ett fel uppstod vid hämtning av helgdagar. Försök igen.</p>';
     }
+  }
+
+  function renderTable(holidays, countryName, year) {
+    let html = `<p class="results-info">${holidays.length} helgdagar i <strong>${countryName}</strong> (${year})</p>`;
+    html += `<table id="holidayTable"><thead><tr><th>Datum</th><th>Dag</th><th>Helgdag</th><th>Typ</th></tr></thead><tbody>`;
+
+    for (const h of holidays) {
+      html += `<tr>
+        <td class="date-col">${formatDate(h.date)}</td>
+        <td class="day-col">${dayName(h.date)}</td>
+        <td>${h.localName}${h.name !== h.localName ? ` <span style="color:var(--muted);font-size:0.8rem">(${h.name})</span>` : ''}</td>
+        <td><span class="badge ${toBadgeClass(h.types?.[0])}">${toLabel(h.types?.[0] || 'Public')}</span></td>
+      </tr>`;
+    }
+
+    html += '</tbody></table>';
+    resultsDiv.innerHTML = html;
+  }
+
+  async function downloadPDF() {
+    if (!currentHolidays.length) return;
+    const year = yearInput.value;
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+    const pageW = 190;
+    let y = 15;
+
+    function addTitle() {
+      doc.setFontSize(18);
+      doc.setTextColor(99, 102, 241);
+      doc.text(`Helgdagar i ${currentCountryName}`, 15, y);
+      doc.setFontSize(12);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`${year}`, 15, y + 7);
+      doc.setDrawColor(200, 200, 200);
+      doc.line(15, y + 12, 15 + pageW, y + 12);
+      y += 20;
+    }
+
+    addTitle();
+
+    for (const h of currentHolidays) {
+      const d = new Date(h.date + 'T00:00:00');
+      const datum = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      const dag = dayNames[d.getDay()];
+      const typ = toLabel(h.types?.[0] || 'Public');
+
+      const lineH = 7;
+      if (y + lineH > 285) {
+        doc.addPage();
+        y = 15;
+        addTitle();
+      }
+
+      doc.setFontSize(9);
+      doc.setTextColor(99, 102, 241);
+      doc.text(datum, 15, y, { align: 'left' });
+
+      doc.setFontSize(9);
+      doc.setTextColor(150, 150, 150);
+      doc.text(dag, 38, y);
+
+      doc.setFontSize(10);
+      doc.setTextColor(20, 20, 20);
+      const name = h.localName;
+      doc.text(name, 52, y);
+
+      doc.setFontSize(8);
+      doc.setTextColor(99, 102, 241);
+      doc.text(typ, 175, y, { align: 'right' });
+
+      y += lineH + 1;
+    }
+
+    const code = countrySelect.value;
+    doc.save(`helgdagar_${code}_${year}.pdf`);
   }
 
   countrySelect.addEventListener('change', loadHolidays);
@@ -358,6 +460,7 @@
 
   loadCountries().then(() => loadHolidays());
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 
 </body>
 </html>
