@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Helgdagar</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --border: #334155;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #6366f1;
+    --accent-hover: #818cf8;
+    --red: #ef4444;
+    --green: #22c55e;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 750px;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 0.25rem;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+  }
+
+  .controls {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 1.25rem;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .field label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .field select,
+  .field input {
+    appearance: none;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.6rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .field select:focus,
+  .field input:focus {
+    border-color: var(--accent);
+  }
+
+  .field select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    padding-right: 2.25rem;
+  }
+
+  .field select option {
+    background: var(--card);
+    color: var(--text);
+  }
+
+  .status {
+    text-align: center;
+    padding: 2rem;
+    color: var(--muted);
+  }
+
+  .status.error {
+    color: var(--red);
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .results-info {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--border);
+  }
+
+  td {
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  tr:hover td {
+    background: rgba(255,255,255,0.02);
+  }
+
+  .date-col { white-space: nowrap; color: var(--accent-hover); font-variant-numeric: tabular-nums; }
+  .day-col { color: var(--muted); font-size: 0.8rem; white-space: nowrap; }
+
+  .badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .badge-public { background: rgba(99,102,241,0.2); color: #a5b4fc; }
+  .badge-bank { background: rgba(239,68,68,0.15); color: #fca5a5; }
+  .badge-optional { background: rgba(234,179,8,0.15); color: #fde047; }
+  .badge-school { background: rgba(34,197,94,0.15); color: #86efac; }
+  .badge-observance { background: rgba(148,163,184,0.15); color: #cbd5e1; }
+
+  @media (max-width: 500px) {
+    body { padding: 1rem 0.5rem; }
+    .controls { flex-direction: column; }
+    .field { min-width: auto; }
+    th:nth-child(3), td:nth-child(3) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Helgdagar</h1>
+  <p class="subtitle">Bläddra bland helgdagar för olika länder och år</p>
+
+  <div class="controls">
+    <div class="field">
+      <label for="country">Land</label>
+      <select id="country">
+        <option value="">Laddar länder&hellip;</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="year">År</label>
+      <input type="number" id="year" value="2026" min="1900" max="2100" placeholder="År">
+    </div>
+  </div>
+
+  <div id="results"></div>
+</div>
+
+<script>
+  const countrySelect = document.getElementById('country');
+  const yearInput = document.getElementById('year');
+  const resultsDiv = document.getElementById('results');
+
+  const API = 'https://date.nager.at/api/v3';
+
+  let countries = [];
+
+  const dayNames = ['Söndag','Måndag','Tisdag','Onsdag','Torsdag','Fredag','Lördag'];
+
+  function toLabel(type) {
+    const map = {
+      Public: 'Allmän helgdag',
+      Bank: 'Bank',
+      Optional: 'Frivillig',
+      School: 'Skola',
+      Observance: 'Kulturell högtid',
+    };
+    return map[type] || type;
+  }
+
+  function toBadgeClass(type) {
+    const map = {
+      Public: 'badge-public',
+      Bank: 'badge-bank',
+      Optional: 'badge-optional',
+      School: 'badge-school',
+      Observance: 'badge-observance',
+    };
+    return map[type] || '';
+  }
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${d.getFullYear()}-${mm}-${dd}`;
+  }
+
+  function dayName(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    return dayNames[d.getDay()];
+  }
+
+  async function loadCountries() {
+    try {
+      const res = await fetch(`${API}/AvailableCountries`);
+      if (!res.ok) throw new Error('Kunde inte hämta länder');
+      countries = await res.json();
+
+      countries.sort((a, b) => a.name.localeCompare(b.name, 'sv'));
+
+      countrySelect.innerHTML = '';
+      for (const c of countries) {
+        const selected = c.countryCode === 'SE' ? ' selected' : '';
+        countrySelect.innerHTML += `<option value="${c.countryCode}"${selected}>${c.name}</option>`;
+      }
+    } catch {
+      countrySelect.innerHTML = '<option value="">Kunde inte ladda länder</option>';
+      resultsDiv.innerHTML = '<p class="status error">Kunde inte nå API:et. Kontrollera din internetanslutning.</p>';
+    }
+  }
+
+  async function loadHolidays() {
+    const code = countrySelect.value;
+    const year = parseInt(yearInput.value, 10);
+
+    if (!code) return;
+    if (!year || year < 1900 || year > 2100) {
+      resultsDiv.innerHTML = '<p class="status error">Ange ett giltigt år (1900–2100).</p>';
+      return;
+    }
+
+    resultsDiv.innerHTML = '<p class="status"><span class="spinner"></span>Hämtar helgdagar&hellip;</p>';
+
+    try {
+      const res = await fetch(`${API}/PublicHolidays/${year}/${code}`);
+      if (!res.ok) {
+        if (res.status === 404) {
+          resultsDiv.innerHTML = '<p class="status">Inga helgdagar hittades för detta land och år.</p>';
+        } else {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        return;
+      }
+
+      const holidays = await res.json();
+
+      // Deduplicera: prioritera Public > Bank > Optional > School > Observance
+      const typeRank = { Public: 5, Bank: 4, Optional: 3, School: 2, Observance: 1 };
+      const deduped = new Map();
+      for (const h of holidays) {
+        const rank = h.types?.reduce((max, t) => Math.max(max, typeRank[t] || 0), 0) || 0;
+        if (rank > (deduped.get(h.date)?.rank || 0)) {
+          deduped.set(h.date, { h, rank });
+        }
+      }
+      const unique = [...deduped.values()]
+        .sort((a, b) => a.h.date.localeCompare(b.h.date))
+        .map(d => d.h);
+
+      if (unique.length === 0) {
+        resultsDiv.innerHTML = '<p class="status">Inga helgdagar hittades för detta land och år.</p>';
+        return;
+      }
+
+      const countryName = countries.find(c => c.countryCode === code)?.name || code;
+
+      let html = `<p class="results-info">${unique.length} helgdagar i <strong>${countryName}</strong> (${year})</p>`;
+      html += `<table><thead><tr><th>Datum</th><th>Dag</th><th>Helgdag</th><th>Typ</th></tr></thead><tbody>`;
+
+      for (const h of unique) {
+        html += `<tr>
+          <td class="date-col">${formatDate(h.date)}</td>
+          <td class="day-col">${dayName(h.date)}</td>
+          <td>${h.localName}${h.name !== h.localName ? ` <span style="color:var(--muted);font-size:0.8rem">(${h.name})</span>` : ''}</td>
+          <td><span class="badge ${toBadgeClass(h.types?.[0])}">${toLabel(h.types?.[0] || 'Public')}</span></td>
+        </tr>`;
+      }
+
+      html += '</tbody></table>';
+      resultsDiv.innerHTML = html;
+
+    } catch {
+      resultsDiv.innerHTML = '<p class="status error">Ett fel uppstod vid hämtning av helgdagar. Försök igen.</p>';
+    }
+  }
+
+  countrySelect.addEventListener('change', loadHolidays);
+  yearInput.addEventListener('change', loadHolidays);
+  yearInput.addEventListener('input', () => {
+    clearTimeout(yearInput._debounce);
+    yearInput._debounce = setTimeout(loadHolidays, 400);
+  });
+
+  loadCountries().then(() => loadHolidays());
+</script>
+
+</body>
+</html>
