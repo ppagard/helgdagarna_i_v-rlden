@@ -392,68 +392,33 @@
 
   async function downloadPDF() {
     if (!currentHolidays.length) return;
-    if (typeof window.jspdf === 'undefined') {
-      resultsDiv.innerHTML += '<p class="status error">PDF-biblioteket laddades inte. Ladda om sidan och försök igen.</p>';
-      return;
-    }
-
-    const year = yearInput.value;
-
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-
-    const pageW = 190;
-    let y = 15;
-
-    function addTitle() {
-      doc.setFontSize(18);
-      doc.setTextColor(99, 102, 241);
-      doc.text(`Helgdagar i ${currentCountryName}`, 15, y);
-      doc.setFontSize(12);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`${year}`, 15, y + 7);
-      doc.setDrawColor(200, 200, 200);
-      doc.line(15, y + 12, 15 + pageW, y + 12);
-      y += 20;
-    }
-
-    addTitle();
-
-    for (const h of currentHolidays) {
-      const d = new Date(h.date + 'T00:00:00');
-      const datum = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-      const dag = dayNames[d.getDay()];
-      const typ = toLabel(h.types?.[0] || 'Public');
-
-      const lineH = 7;
-      if (y + lineH > 285) {
-        doc.addPage();
-        y = 15;
-        addTitle();
-      }
-
-      doc.setFontSize(9);
-      doc.setTextColor(99, 102, 241);
-      doc.text(datum, 15, y, { align: 'left' });
-
-      doc.setFontSize(9);
-      doc.setTextColor(150, 150, 150);
-      doc.text(dag, 38, y);
-
-      doc.setFontSize(10);
-      doc.setTextColor(20, 20, 20);
-      const name = h.localName;
-      doc.text(name, 52, y);
-
-      doc.setFontSize(8);
-      doc.setTextColor(99, 102, 241);
-      doc.text(typ, 175, y, { align: 'right' });
-
-      y += lineH + 1;
-    }
-
     const code = countrySelect.value;
-    doc.save(`helgdagar_${code}_${year}.pdf`);
+    const year = yearInput.value;
+    const btn = document.getElementById('pdfBtn');
+    btn.disabled = true;
+    btn.textContent = 'Genererar…';
+
+    try {
+      const res = await fetch(`/api/pdf?country=${code}&year=${year}`);
+      if (!res.ok) {
+        const msg = await res.text();
+        throw new Error(msg || `HTTP ${res.status}`);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `helgdagar_${code}_${year}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      resultsDiv.innerHTML += `<p class="status error">Kunde inte generera PDF: ${err.message}</p>`;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8" fill="none" stroke="#fff" stroke-width="2"/><line x1="12" y1="12" x2="12" y2="18" fill="none" stroke="#fff" stroke-width="2"/><polyline points="9 15 12 18 15 15" fill="none" stroke="#fff" stroke-width="2"/></svg> PDF`;
+    }
   }
 
   countrySelect.addEventListener('change', loadHolidays);
@@ -465,7 +430,6 @@
 
   loadCountries().then(() => loadHolidays());
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 </body>
 </html>

@@ -1256,7 +1256,7 @@ class HolidayPDF(FPDF):
         self.cell(0, 10, f"Sida {self.page_no()}", align="C")
 
 
-def generate_pdf(country_code, year, output_path, country_name=None):
+def generate_pdf(country_code, year, output_path=None, country_name=None):
     if country_name is None:
         country_name, raw = fetch_holidays(country_code, year)
     else:
@@ -1438,6 +1438,8 @@ def generate_pdf(country_code, year, output_path, country_name=None):
     pdf.set_text_color(71, 85, 105)
     pdf.cell(0, 8, f"Helgdagar i {country_name} \u2013 {year}", align="C")
 
+    if output_path is None:
+        return pdf.output()
     pdf.output(output_path)
     return pdf.page_no()
 
