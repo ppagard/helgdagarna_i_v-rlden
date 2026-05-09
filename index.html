@@ -247,6 +247,10 @@
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8" fill="none" stroke="#fff" stroke-width="2"/><line x1="12" y1="12" x2="12" y2="18" fill="none" stroke="#fff" stroke-width="2"/><polyline points="9 15 12 18 15 15" fill="none" stroke="#fff" stroke-width="2"/></svg>
       PDF
     </button>
+    <button class="pdf-btn" id="icsBtn" disabled onclick="downloadICS()">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" fill="none" stroke="#fff" stroke-width="2"/><line x1="16" y1="2" x2="16" y2="6" fill="none" stroke="#fff" stroke-width="2"/><line x1="8" y1="2" x2="8" y2="6" fill="none" stroke="#fff" stroke-width="2"/><line x1="3" y1="10" x2="21" y2="10" fill="none" stroke="#fff" stroke-width="2"/><text x="12" y="18" text-anchor="middle" fill="#fff" font-size="7" font-family="sans-serif" font-weight="bold">ICS</text></svg>
+      Kalender
+    </button>
   </div>
 
   <div id="results"></div>
@@ -323,6 +327,7 @@
     const code = countrySelect.value;
     const year = parseInt(yearInput.value, 10);
     document.getElementById('pdfBtn').disabled = true;
+    document.getElementById('icsBtn').disabled = true;
 
     if (!code) return;
     if (!year || year < 1900 || year > 2100) {
@@ -367,6 +372,7 @@
 
       renderTable(currentHolidays, currentCountryName, year);
       document.getElementById('pdfBtn').disabled = false;
+      document.getElementById('icsBtn').disabled = false;
 
     } catch {
       resultsDiv.innerHTML = '<p class="status error">Ett fel uppstod vid hämtning av helgdagar. Försök igen.</p>';
@@ -419,6 +425,57 @@
       btn.disabled = false;
       btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8" fill="none" stroke="#fff" stroke-width="2"/><line x1="12" y1="12" x2="12" y2="18" fill="none" stroke="#fff" stroke-width="2"/><polyline points="9 15 12 18 15 15" fill="none" stroke="#fff" stroke-width="2"/></svg> PDF`;
     }
+  }
+
+  function escapeICS(text) {
+    return String(text).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+  }
+
+  function downloadICS() {
+    if (!currentHolidays.length) return;
+    const code = countrySelect.value;
+    const year = yearInput.value;
+    const countryName = currentCountryName;
+
+    let ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Helgdagar//SV',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      'X-WR-CALNAME:Helgdagar ' + countryName + ' ' + year,
+      'X-WR-TIMEZONE:UTC',
+    ];
+
+    for (const h of currentHolidays) {
+      const d = h.date.replace(/-/g, '');
+      const next = new Date(h.date + 'T00:00:00');
+      next.setDate(next.getDate() + 1);
+      const nextStr = next.toISOString().split('T')[0].replace(/-/g, '');
+      const typ = toLabel(h.types?.[0] || 'Public');
+      const name = escapeICS(h.localName);
+      const engName = h.name !== h.localName ? ' (' + escapeICS(h.name) + ')' : '';
+
+      ics.push('BEGIN:VEVENT');
+      ics.push('DTSTART;VALUE=DATE:' + d);
+      ics.push('DTEND;VALUE=DATE:' + nextStr);
+      ics.push('SUMMARY:' + name);
+      ics.push('DESCRIPTION:' + escapeICS(typ + engName + '\\n' + countryName + ' ' + year));
+      ics.push('CATEGORIES:' + typ);
+      ics.push('TRANSP:TRANSPARENT');
+      ics.push('END:VEVENT');
+    }
+
+    ics.push('END:VCALENDAR');
+    const blob = new Blob([ics.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'helgdagar_' + code + '_' + year + '.ics';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 
   countrySelect.addEventListener('change', loadHolidays);
